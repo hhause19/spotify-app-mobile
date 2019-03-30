@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {Fragment} from 'react';
 import axios from 'axios';
 import {
   AsyncStorage,
@@ -10,6 +10,7 @@ import {
   FlatList,
   TouchableOpacity,
   View,
+  StatusBar,
   SafeAreaView,
 } from 'react-native';
 import {ButtonGroup} from 'react-native-elements'
@@ -17,17 +18,19 @@ import {WebBrowser} from 'expo';
 import {AuthSession} from 'expo'
 import {MonoText} from '../components/StyledText';
 
-import SongListItem from '../components/SongListItem';
- const timeRangeButtons = [{key: 'short_term', value: '4 Weeks'},
-      {key: 'medium_term', value: '6 Months'},
-      {key: 'long_term', value: 'All Time'}];
+import TopBar from '../components/homeScreen/TopBar';
+import SongListItem from '../components/homeScreen/SongListItem';
+
+const timeRanges = [{key: 'short_term', val: 'Past 4 Weeks'},
+  {key: 'medium_term', val: 'Past 6 Months'},
+  {key: 'long_term', val: 'All Time'}];
 
 export default class HomeScreen extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       songItems: [],
-      timeRange: 'medium_term'
+      timeRange: timeRanges[1]
     };
   }
 
@@ -46,7 +49,7 @@ export default class HomeScreen extends React.Component {
         method: 'GET',
         url: 'https://api.spotify.com/v1/me/top/tracks',
         params: {
-          time_range: this.state.timeRange,
+          time_range: this.state.timeRange.key,
           limit: 50
         },
         headers: {
@@ -77,64 +80,73 @@ export default class HomeScreen extends React.Component {
 
   render() {
     return (
-      <SafeAreaView style={styles.container}>
-        <ButtonGroup
-          onPress={this.onSelectTimeRange}
-          selectedIndex={timeRangeButtons.findIndex(b => b.key === this.state.timeRange)}
-          buttons={timeRangeButtons.map(b => b.value)}
-          containerStyle={{height: 50}}
+      <Fragment>
+        <StatusBar
+          backgroundColor="blue"
+          barStyle="light-content"
         />
-        <ScrollView ref={el => this._scrollView = el}
-                    style={styles.container}
-                    contentContainerStyle={styles.contentContainer}>
+        <SafeAreaView style={styles.topSafeView}/>
+        <SafeAreaView style={styles.container}>
 
-          <FlatList
-            data={this.state.songItems}
-            keyExtractor={(item, index) => index.toString()}
-            renderItem={({item}) => <SongListItem index={item.index}
-                                                  name={item.name}
-                                                  artists={item.artists}
-                                                  albumCoverSrc={item.albumCoverSrc}/>}/>
-          {/*<View style={styles.welcomeContainer}>*/}
-          {/*<Image*/}
-          {/*source={*/}
-          {/*__DEV__*/}
-          {/*? require('../assets/images/robot-dev.png')*/}
-          {/*: require('../assets/images/robot-prod.png')*/}
-          {/*}*/}
-          {/*style={styles.welcomeImage}*/}
+          {/*<ButtonGroup*/}
+          {/*onPress={this.onSelectTimeRange}*/}
+          {/*selectedIndex={timeRangeButtons.findIndex(b => b.key === this.state.timeRange)}*/}
+          {/*buttons={timeRangeButtons.map(b => b.value)}*/}
+          {/*containerStyle={{height: 50}}*/}
           {/*/>*/}
-          {/*</View>*/}
+          <TopBar timeRange={this.state.timeRange.val}/>
+          <ScrollView ref={el => this._scrollView = el}
+                      style={styles.container}
+                      contentContainerStyle={styles.contentContainer}>
 
-          {/*<View style={styles.getStartedContainer}>*/}
-          {/*{this._maybeRenderDevelopmentModeWarning()}*/}
+            <FlatList
+              data={this.state.songItems}
+              keyExtractor={(item, index) => index.toString()}
+              renderItem={({item}) => <SongListItem index={item.index}
+                                                    name={item.name}
+                                                    artists={item.artists}
+                                                    albumCoverSrc={item.albumCoverSrc}/>}/>
+            {/*<View style={styles.welcomeContainer}>*/}
+            {/*<Image*/}
+            {/*source={*/}
+            {/*__DEV__*/}
+            {/*? require('../assets/images/robot-dev.png')*/}
+            {/*: require('../assets/images/robot-prod.png')*/}
+            {/*}*/}
+            {/*style={styles.welcomeImage}*/}
+            {/*/>*/}
+            {/*</View>*/}
+
+            {/*<View style={styles.getStartedContainer}>*/}
+            {/*{this._maybeRenderDevelopmentModeWarning()}*/}
 
             {/*<Text style={styles.getStartedText}>Get started by opening</Text>*/}
 
             {/*<View style={[styles.codeHighlightContainer, styles.homeScreenFilename]}>*/}
-              {/*<MonoText style={styles.codeHighlightText}>screens/Hello.js</MonoText>*/}
+            {/*<MonoText style={styles.codeHighlightText}>screens/Hello.js</MonoText>*/}
             {/*</View>*/}
 
             {/*<Text style={styles.getStartedText}>*/}
-              {/*{this.state.name ? `${this.state.name}` : 'Change this text and your app will automatically reload.'}*/}
+            {/*{this.state.name ? `${this.state.name}` : 'Change this text and your app will automatically reload.'}*/}
             {/*</Text>*/}
-          {/*</View>*/}
+            {/*</View>*/}
 
-          {/*<View style={styles.helpContainer}>*/}
+            {/*<View style={styles.helpContainer}>*/}
             {/*<TouchableOpacity onPress={this._handleHelpPress} style={styles.helpLink}>*/}
-              {/*<Text style={styles.helpLinkText}>Help, it didn’t automatically reload!</Text>*/}
+            {/*<Text style={styles.helpLinkText}>Help, it didn’t automatically reload!</Text>*/}
             {/*</TouchableOpacity>*/}
-          {/*</View>*/}
-        </ScrollView>
+            {/*</View>*/}
+          </ScrollView>
 
-        {/*<View style={styles.tabBarInfoContainer}>*/}
+          {/*<View style={styles.tabBarInfoContainer}>*/}
           {/*<Text style={styles.tabBarInfoText}>This is a tab bar. You can edit it in:</Text>*/}
 
           {/*<View style={[styles.codeHighlightContainer, styles.navigationFilename]}>*/}
-            {/*<MonoText style={styles.codeHighlightText}>navigation/MainTabNavigator.js</MonoText>*/}
+          {/*<MonoText style={styles.codeHighlightText}>navigation/MainTabNavigator.js</MonoText>*/}
           {/*</View>*/}
-        {/*</View>*/}
-      </SafeAreaView>
+          {/*</View>*/}
+        </SafeAreaView>
+      </Fragment>
     );
   }
 
@@ -173,9 +185,12 @@ export default class HomeScreen extends React.Component {
 }
 
 const styles = StyleSheet.create({
+  topSafeView: {
+    flex: 0,
+    backgroundColor: 'rgb(33, 33, 33)',
+  },
   container: {
     flex: 1,
-    paddingTop: 0,
     paddingBottom: 30,
     backgroundColor: 'rgb(49, 48, 49)',
   },
