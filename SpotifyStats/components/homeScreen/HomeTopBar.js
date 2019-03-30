@@ -5,7 +5,7 @@ import {Icon} from 'react-native-elements';
 import {ExpoLinksView} from '@expo/samples';
 import Colors from "../../constants/Colors";
 
-class TopBar extends React.Component {
+class HomeTopBar extends React.Component {
   constructor(props) {
     super(props);
   }
@@ -17,6 +17,7 @@ class TopBar extends React.Component {
         <Text style={styles.timeRange}>{this.props.timeRange}</Text>
         <View style={styles.settingsIcon}>
           <Icon
+            onPress={this.props.toggleSettingsPanel}
             name='ios-cog'
             size={28}
             type='ionicon'
@@ -51,8 +52,9 @@ const styles = StyleSheet.create({
   }
 });
 
-TopBar.propTypes = {
+HomeTopBar.propTypes = {
   timeRange: PropTypes.string.isRequired,
+  toggleSettingsPanel: PropTypes.func.isRequired
 };
 
-export default TopBar;
+export default HomeTopBar;

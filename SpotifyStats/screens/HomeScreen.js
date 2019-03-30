@@ -18,7 +18,8 @@ import {WebBrowser} from 'expo';
 import {AuthSession} from 'expo'
 import {MonoText} from '../components/StyledText';
 
-import TopBar from '../components/homeScreen/TopBar';
+import HomeTopBar from '../components/homeScreen/HomeTopBar';
+import SettingsPanel from '../components/homeScreen/SettingsPanel';
 import SongListItem from '../components/homeScreen/SongListItem';
 
 const timeRanges = [{key: 'short_term', val: 'Past 4 Weeks'},
@@ -30,7 +31,8 @@ export default class HomeScreen extends React.Component {
     super(props);
     this.state = {
       songItems: [],
-      timeRange: timeRanges[1]
+      timeRange: timeRanges[1],
+      showSettingsPanel: false
     };
   }
 
@@ -40,6 +42,9 @@ export default class HomeScreen extends React.Component {
 
   componentDidMount() {
     this.getUserTopTracks();
+  };
+
+  componentDidUpdate(prevProps, prevState, snapshot) {
   };
 
   getUserTopTracks = async () => {
@@ -78,6 +83,12 @@ export default class HomeScreen extends React.Component {
       this.getUserTopTracks)
   };
 
+  toggleSettingsPanel = () => {
+    this.setState((prevState) => ({
+      showSettingsPanel: !prevState.showSettingsPanel
+    }))
+  };
+
   render() {
     return (
       <Fragment>
@@ -94,7 +105,9 @@ export default class HomeScreen extends React.Component {
           {/*buttons={timeRangeButtons.map(b => b.value)}*/}
           {/*containerStyle={{height: 50}}*/}
           {/*/>*/}
-          <TopBar timeRange={this.state.timeRange.val}/>
+          <HomeTopBar timeRange={this.state.timeRange.val}
+                      toggleSettingsPanel={this.toggleSettingsPanel}/>
+
           <ScrollView ref={el => this._scrollView = el}
                       style={styles.container}
                       contentContainerStyle={styles.contentContainer}>
@@ -146,6 +159,8 @@ export default class HomeScreen extends React.Component {
           {/*</View>*/}
           {/*</View>*/}
         </SafeAreaView>
+        <SettingsPanel show={this.state.showSettingsPanel}
+        toggle={this.toggleSettingsPanel}/>
       </Fragment>
     );
   }
