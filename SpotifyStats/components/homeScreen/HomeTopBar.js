@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import {View, Text, ScrollView, Button, StyleSheet} from 'react-native';
+import {View, Text, ScrollView, Button, StyleSheet, TouchableHighlight} from 'react-native';
 import {Icon} from 'react-native-elements';
 import {ExpoLinksView} from '@expo/samples';
 import Colors from "../../constants/Colors";
@@ -21,8 +21,8 @@ class HomeTopBar extends React.Component {
             name='ios-cog'
             size={28}
             type='ionicon'
-            color={'white'}
-          />
+            underlayColor={'rgb(33, 33, 33)'}
+            color='white'/>
         </View>
       </View>
     );
@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
   },
   topSongs: {
     textAlign: 'center',
-    fontSize: 22,
+    fontSize: 24,
     color: '#fff'
   },
   timeRange: {

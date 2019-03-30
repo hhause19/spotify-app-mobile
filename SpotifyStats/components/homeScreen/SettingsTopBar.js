@@ -28,7 +28,7 @@ const styles = StyleSheet.create({
   },
   settingsText: {
     textAlign: 'center',
-    fontSize: 22,
+    fontSize: 24,
     color: '#fff'
   },
   settingsIcon: {
@@ -38,8 +38,8 @@ const styles = StyleSheet.create({
   },
   doneText: {
     color: 'white',
-    fontSize: 18,
-    fontWeight: '700'
+    fontSize: 19,
+    fontWeight: '600'
   }
 });
 

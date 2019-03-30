@@ -29,6 +29,7 @@ class SettingsPanel extends React.Component {
       <SlidingUpPanel allowDragging={false} ref={c => this._panel = c}>
         <SafeAreaView style={styles.panel}>
           <SettingsTopBar toggleSettingsPanel={this.props.toggle}/>
+          <Text style={styles.settingsOptionHeader}>Time Range</Text>
         </SafeAreaView>
       </SlidingUpPanel>
     );
@@ -41,6 +42,11 @@ const styles = StyleSheet.create({
     position: 'relative',
     backgroundColor: 'rgb(33, 33, 33)',
   },
+  settingsOptionHeader: {
+    textAlign: 'center',
+    fontSize: 22,
+    color: '#fff'
+  }
 });
 
 SettingsPanel.propTypes = {
