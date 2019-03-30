@@ -1,25 +1,33 @@
 import React from 'react';
 import axios from 'axios';
 import {
+  AsyncStorage,
   Image,
   Platform,
   ScrollView,
   StyleSheet,
   Text,
+  FlatList,
   TouchableOpacity,
   View,
+  SafeAreaView,
 } from 'react-native';
+import {ButtonGroup} from 'react-native-elements'
 import {WebBrowser} from 'expo';
 import {AuthSession} from 'expo'
-import {getTokens} from '../authorization/getSpotifyToken';
-import SpotifyWebAPI from 'spotify-web-api-js';
 import {MonoText} from '../components/StyledText';
+
+import SongListItem from '../components/SongListItem';
+ const timeRangeButtons = [{key: 'short_term', value: '4 Weeks'},
+      {key: 'medium_term', value: '6 Months'},
+      {key: 'long_term', value: 'All Time'}];
 
 export default class HomeScreen extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      name: ''
+      songItems: [],
+      timeRange: 'medium_term'
     };
   }
 
@@ -28,75 +36,105 @@ export default class HomeScreen extends React.Component {
   };
 
   componentDidMount() {
-    getTokens().then(access_token => {
-      axios({
+    this.getUserTopTracks();
+  };
+
+  getUserTopTracks = async () => {
+    const access_token = await AsyncStorage.getItem('access_token');
+    try {
+      const res = await axios({
         method: 'GET',
-        url: 'https://api.spotify.com/v1/me',
+        url: 'https://api.spotify.com/v1/me/top/tracks',
+        params: {
+          time_range: this.state.timeRange,
+          limit: 50
+        },
         headers: {
           'Authorization': 'Bearer ' + access_token
         }
-      })
-        .then(res => {
-          this.setState({name: res.data.display_name});
-        })
-        .catch(err => console.log(err));
-    });
+      });
+      let songs = res.data.items;
+      let songItems = songs.map((song, i) => {
+        return {
+          index: i,
+          name: song.name,
+          artists: song.artists.map(a => a.name),
+          albumCoverSrc: song.album.images[2].url
+        };
+      });
+      this.setState({songItems}, this._scrollView.scrollTo({x: 0}));
+    } catch (err) {
+      console.log(err)
+    }
   };
 
-  // getUserPlaylists = async () => {
-  //   const {id: userId} = await sp.getMe();
-  //   const {items: playlists} = await sp.getUserPlaylists(userId, {limit: 50});
-  //   this.setState({playlists});
-  //   return playlists;
-  // };
+  onSelectTimeRange = (selectedIndex) => {
+    this.setState({
+        timeRange: timeRangeButtons[selectedIndex].key
+      },
+      this.getUserTopTracks)
+  };
 
   render() {
-    console.log('hello');
-    console.log(AuthSession.getRedirectUrl());
-    console.log(this.state.playlists);
     return (
-      <View style={styles.container}>
-        <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-          <View style={styles.welcomeContainer}>
-            <Image
-              source={
-                __DEV__
-                  ? require('../assets/images/robot-dev.png')
-                  : require('../assets/images/robot-prod.png')
-              }
-              style={styles.welcomeImage}
-            />
-          </View>
+      <SafeAreaView style={styles.container}>
+        <ButtonGroup
+          onPress={this.onSelectTimeRange}
+          selectedIndex={timeRangeButtons.findIndex(b => b.key === this.state.timeRange)}
+          buttons={timeRangeButtons.map(b => b.value)}
+          containerStyle={{height: 50}}
+        />
+        <ScrollView ref={el => this._scrollView = el}
+                    style={styles.container}
+                    contentContainerStyle={styles.contentContainer}>
 
-          <View style={styles.getStartedContainer}>
-            {this._maybeRenderDevelopmentModeWarning()}
+          <FlatList
+            data={this.state.songItems}
+            keyExtractor={(item, index) => index.toString()}
+            renderItem={({item}) => <SongListItem index={item.index}
+                                                  name={item.name}
+                                                  artists={item.artists}
+                                                  albumCoverSrc={item.albumCoverSrc}/>}/>
+          {/*<View style={styles.welcomeContainer}>*/}
+          {/*<Image*/}
+          {/*source={*/}
+          {/*__DEV__*/}
+          {/*? require('../assets/images/robot-dev.png')*/}
+          {/*: require('../assets/images/robot-prod.png')*/}
+          {/*}*/}
+          {/*style={styles.welcomeImage}*/}
+          {/*/>*/}
+          {/*</View>*/}
 
-            <Text style={styles.getStartedText}>Get started by opening</Text>
+          {/*<View style={styles.getStartedContainer}>*/}
+          {/*{this._maybeRenderDevelopmentModeWarning()}*/}
 
-            <View style={[styles.codeHighlightContainer, styles.homeScreenFilename]}>
-              <MonoText style={styles.codeHighlightText}>screens/Hello.js</MonoText>
-            </View>
+            {/*<Text style={styles.getStartedText}>Get started by opening</Text>*/}
 
-            <Text style={styles.getStartedText}>
-              {this.state.name ? `${this.state.name}` : 'Change this text and your app will automatically reload.'}
-            </Text>
-          </View>
+            {/*<View style={[styles.codeHighlightContainer, styles.homeScreenFilename]}>*/}
+              {/*<MonoText style={styles.codeHighlightText}>screens/Hello.js</MonoText>*/}
+            {/*</View>*/}
 
-          <View style={styles.helpContainer}>
-            <TouchableOpacity onPress={this._handleHelpPress} style={styles.helpLink}>
-              <Text style={styles.helpLinkText}>Help, it didn’t automatically reload!</Text>
-            </TouchableOpacity>
-          </View>
+            {/*<Text style={styles.getStartedText}>*/}
+              {/*{this.state.name ? `${this.state.name}` : 'Change this text and your app will automatically reload.'}*/}
+            {/*</Text>*/}
+          {/*</View>*/}
+
+          {/*<View style={styles.helpContainer}>*/}
+            {/*<TouchableOpacity onPress={this._handleHelpPress} style={styles.helpLink}>*/}
+              {/*<Text style={styles.helpLinkText}>Help, it didn’t automatically reload!</Text>*/}
+            {/*</TouchableOpacity>*/}
+          {/*</View>*/}
         </ScrollView>
 
-        <View style={styles.tabBarInfoContainer}>
-          <Text style={styles.tabBarInfoText}>This is a tab bar. You can edit it in:</Text>
+        {/*<View style={styles.tabBarInfoContainer}>*/}
+          {/*<Text style={styles.tabBarInfoText}>This is a tab bar. You can edit it in:</Text>*/}
 
-          <View style={[styles.codeHighlightContainer, styles.navigationFilename]}>
-            <MonoText style={styles.codeHighlightText}>navigation/MainTabNavigator.js</MonoText>
-          </View>
-        </View>
-      </View>
+          {/*<View style={[styles.codeHighlightContainer, styles.navigationFilename]}>*/}
+            {/*<MonoText style={styles.codeHighlightText}>navigation/MainTabNavigator.js</MonoText>*/}
+          {/*</View>*/}
+        {/*</View>*/}
+      </SafeAreaView>
     );
   }
 
@@ -137,7 +175,14 @@ export default class HomeScreen extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    paddingTop: 0,
+    paddingBottom: 30,
+    backgroundColor: 'rgb(49, 48, 49)',
+  },
+  item: {
+    padding: 10,
+    fontSize: 18,
+    height: 44,
   },
   developmentModeText: {
     marginBottom: 20,
@@ -147,7 +192,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   contentContainer: {
-    paddingTop: 30,
+    paddingTop: 0,
+    backgroundColor: 'rgb(49, 48, 49)',
   },
   welcomeContainer: {
     alignItems: 'center',

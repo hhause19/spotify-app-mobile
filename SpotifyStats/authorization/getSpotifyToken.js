@@ -1,8 +1,9 @@
 import { encode as btoa } from 'base-64';
 import {spotifyCredentials} from "../constants/apiKeys";
 import {getAuthorizationCode} from './getSpotifyAuthorization';
+import {AsyncStorage} from 'react-native';
 
-export const getTokens = async () => {
+export default getTokens = async () => {
   try {
     const authorizationCode = await getAuthorizationCode();//we wrote this function above
     const credentials = await spotifyCredentials; //we wrote this function above (could also run this outside of the functions and store the credentials in local scope)
@@ -30,6 +31,8 @@ export const getTokens = async () => {
     // await setUserData('refreshToken', refreshToken);
     // await setUserData('expirationTime', expirationTime);
     //console.log(responseJson.access_token);
+    //AsyncStorage.setItem('@MySuperStore:key', 'I like to save it.');
+    //AsyncStorage.setItem('@MySuperStore:key', 'I like to save it.');
     return responseJson.access_token;
   } catch (err) {
     console.error(err);
