@@ -19,19 +19,23 @@ import {AuthSession} from 'expo'
 import {MonoText} from '../components/StyledText';
 
 import HomeTopBar from '../components/homeScreen/HomeTopBar';
-import SettingsPanel from '../components/homeScreen/SettingsPanel';
+import SettingsPanel from '../components/homeScreen/settingsPanel/SettingsPanel';
 import SongListItem from '../components/homeScreen/SongListItem';
 
 const timeRanges = [{key: 'short_term', val: 'Past 4 Weeks'},
   {key: 'medium_term', val: 'Past 6 Months'},
   {key: 'long_term', val: 'All Time'}];
 
+// for development
+import {songItemsData} from '../testData/songItemData';
+
 export default class HomeScreen extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      songItems: [],
+      songItems: songItemsData,
       timeRange: timeRanges[1],
+      resultsLimit: 25,
       showSettingsPanel: false
     };
   }
@@ -55,7 +59,7 @@ export default class HomeScreen extends React.Component {
         url: 'https://api.spotify.com/v1/me/top/tracks',
         params: {
           time_range: this.state.timeRange.key,
-          limit: 50
+          limit: this.state.resultsLimit
         },
         headers: {
           'Authorization': 'Bearer ' + access_token
@@ -70,17 +74,21 @@ export default class HomeScreen extends React.Component {
           albumCoverSrc: song.album.images[2].url
         };
       });
+      //console.log(songItems);
       this.setState({songItems}, this._scrollView.scrollTo({x: 0}));
     } catch (err) {
       console.log(err)
     }
   };
 
-  onSelectTimeRange = (selectedIndex) => {
-    this.setState({
-        timeRange: timeRangeButtons[selectedIndex].key
-      },
-      this.getUserTopTracks)
+  onSelectTimeRange = (timeRange) => {
+    if (timeRange.val !== this.state.timeRange.val)
+      this.setState({timeRange: timeRange}, this.getUserTopTracks);
+  };
+
+  onCompleteResultsLimit = (resultsLimit) => {
+    if (resultsLimit !== this.state.resultsLimit)
+      this.setState({resultsLimit}, this.getUserTopTracks)
   };
 
   toggleSettingsPanel = () => {
@@ -160,7 +168,11 @@ export default class HomeScreen extends React.Component {
           {/*</View>*/}
         </SafeAreaView>
         <SettingsPanel show={this.state.showSettingsPanel}
-        toggle={this.toggleSettingsPanel}/>
+                       toggle={this.toggleSettingsPanel}
+                       selectedTimeRange={this.state.timeRange}
+                       resultsLimit={this.state.resultsLimit}
+                       onSelectTimeRange={this.onSelectTimeRange}
+                       onCompleteResultsLimit={this.onCompleteResultsLimit}/>
       </Fragment>
     );
   }

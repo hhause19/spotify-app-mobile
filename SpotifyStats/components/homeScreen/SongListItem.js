@@ -16,10 +16,14 @@ import {ListItem} from 'react-native-elements'
 const SongListItem = ({index, name, artists, albumCoverSrc}) => {
   return <ListItem
     containerStyle={{backgroundColor: 'rgb(49, 48, 49)'}}
-    title={<Text style={{fontSize: 16, color: '#fff'}}
-                 numberOfLines={1}>{name}</Text>}
-    subtitle={<Text style={{fontSize: 12, color: '#fff'}}
-                    numberOfLines={1}>{artists.join(', ')}</Text>}
+    title={
+      <Text style={{fontSize: 16, color: '#fff'}}
+            numberOfLines={1}>{name}</Text>
+    }
+    subtitle={
+      <Text style={{fontSize: 12, color: '#fff'}}
+            numberOfLines={1}>{artists.join(', ')}</Text>
+    }
     leftAvatar={{
       rounded: false,
       source: {uri: albumCoverSrc},

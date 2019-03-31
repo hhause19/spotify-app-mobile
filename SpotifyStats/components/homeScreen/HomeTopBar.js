@@ -1,33 +1,30 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import {View, Text, ScrollView, Button, StyleSheet, TouchableHighlight} from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  Button,
+  StyleSheet,
+  TouchableHighlight
+} from 'react-native';
 import {Icon} from 'react-native-elements';
-import {ExpoLinksView} from '@expo/samples';
-import Colors from "../../constants/Colors";
 
-class HomeTopBar extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
-  render() {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.topSongs}>Top Songs</Text>
-        <Text style={styles.timeRange}>{this.props.timeRange}</Text>
-        <View style={styles.settingsIcon}>
-          <Icon
-            onPress={this.props.toggleSettingsPanel}
-            name='ios-cog'
-            size={28}
-            type='ionicon'
-            underlayColor={'rgb(33, 33, 33)'}
-            color='white'/>
-        </View>
-      </View>
-    );
-  }
-}
+const HomeTopBar = ({timeRange, toggleSettingsPanel}) => (
+  <View style={styles.container}>
+    <Text style={styles.topSongs}>Top Songs</Text>
+    <Text style={styles.timeRange}>{timeRange}</Text>
+    <View style={styles.settingsIcon}>
+      <Icon
+        onPress={toggleSettingsPanel}
+        name='ios-cog'
+        size={28}
+        type='ionicon'
+        underlayColor={'rgb(33, 33, 33)'}
+        color='white'/>
+    </View>
+  </View>
+);
 
 const styles = StyleSheet.create({
   container: {

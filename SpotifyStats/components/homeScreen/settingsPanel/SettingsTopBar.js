@@ -1,24 +1,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {View, Text, ScrollView, Button, StyleSheet} from 'react-native';
-import {Icon} from 'react-native-elements';
 
-class HomeTopBar extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
-  render() {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.settingsText}>Settings</Text>
-        <View style={styles.settingsIcon}>
-          <Text onPress={this.props.toggleSettingsPanel} style={styles.doneText}>Done</Text>
-        </View>
-      </View>
-    );
-  }
-}
+const SettingsTopBar = ({toggleSettingsPanel}) => (
+  <View style={styles.container}>
+    <Text style={styles.settingsText}>Settings</Text>
+    <View style={styles.settingsIcon}>
+      <Text onPress={toggleSettingsPanel} style={styles.doneText}>Done</Text>
+    </View>
+  </View>
+);
 
 const styles = StyleSheet.create({
   container: {
@@ -43,8 +34,8 @@ const styles = StyleSheet.create({
   }
 });
 
-HomeTopBar.propTypes = {
+SettingsTopBar.propTypes = {
   toggleSettingsPanel: PropTypes.func.isRequired
 };
 
-export default HomeTopBar;
+export default SettingsTopBar;
