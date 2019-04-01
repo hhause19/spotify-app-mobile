@@ -18,6 +18,9 @@ import {WebBrowser} from 'expo';
 import {AuthSession} from 'expo'
 import {MonoText} from '../components/StyledText';
 
+import getSpotifyApi from '../components/api/SpotifyApi';
+import getRestApi from '../components/api/RestApi';
+
 import HomeTopBar from '../components/homeScreen/HomeTopBar';
 import SettingsPanel from '../components/homeScreen/settingsPanel/SettingsPanel';
 import SongListItem from '../components/homeScreen/SongListItem';
@@ -52,17 +55,13 @@ export default class HomeScreen extends React.Component {
   };
 
   getUserTopTracks = async () => {
-    const access_token = await AsyncStorage.getItem('access_token');
+    const api = await getSpotifyApi();
     try {
-      const res = await axios({
-        method: 'GET',
-        url: 'https://api.spotify.com/v1/me/top/tracks',
+      const res = await api.get('me/top/tracks', {
+
         params: {
           time_range: this.state.timeRange.key,
           limit: this.state.resultsLimit
-        },
-        headers: {
-          'Authorization': 'Bearer ' + access_token
         }
       });
       let songs = res.data.items;

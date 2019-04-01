@@ -5,6 +5,9 @@ import {AsyncStorage} from 'react-native';
 import getSpotifyToken from './authorization/getSpotifyToken';
 import AppNavigator from './navigation/AppNavigator';
 
+import getRestApi from './components/api/RestApi';
+import getSpotifyApi from './components/api/SpotifyApi';
+
 export default class App extends React.Component {
   state = {
     isLoadingComplete: false,
@@ -29,6 +32,24 @@ export default class App extends React.Component {
     }
   }
 
+  _getUserSpotifyToken = async () => {
+    let access_token;
+    const api = await getRestApi();
+    const res = await api.get('spotify_token');
+
+    // test if the user is still logged in
+    const spotifyApi = await getSpotifyApi();
+    try {
+      const loginTest = await spotifyApi.get('me');
+      console.log('spotify already logged in');
+      access_token = res.data.access_token;
+    } catch (err) {
+      access_token = await getSpotifyToken();
+    }
+
+    AsyncStorage.setItem('access_token', access_token);
+  };
+
   _loadResourcesAsync = async () => {
     return Promise.all([
 
@@ -43,7 +64,7 @@ export default class App extends React.Component {
         // to remove this if you are not using it in your app
         'space-mono': require('./assets/fonts/SpaceMono-Regular.ttf'),
       }),
-      AsyncStorage.setItem('access_token', await getSpotifyToken())
+      await this._getUserSpotifyToken()
     ]);
   };
 
