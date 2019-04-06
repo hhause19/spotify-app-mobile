@@ -57,10 +57,9 @@ export default class App extends React.Component {
       console.log('spotify already logged in');
       access_token = res.data.access_token;
     } catch (err) {
-
+      access_token = await getSpotifyToken();
     }
 
-    access_token = await getSpotifyToken();
     AsyncStorage.setItem('access_token', access_token);
   };
 

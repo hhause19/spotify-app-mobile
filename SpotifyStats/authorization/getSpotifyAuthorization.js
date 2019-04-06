@@ -1,5 +1,4 @@
 import { AuthSession } from 'expo';
-import axios from 'axios'
 import getRestApi from '../components/api/RestApi';
 
 const scopesArr = ['user-modify-playback-state','user-read-currently-playing','user-read-playback-state','user-library-modify',
@@ -10,7 +9,6 @@ const scopes = scopesArr.join(' ');
 const getSpotifyCredentials = async () => {
   const api = await getRestApi();
   const res = await api.get('spotify-credentials');
-  console.log(res.data);
   return res.data
 };
 
