@@ -29,8 +29,7 @@ class SettingsPanel extends React.Component {
       <SlidingUpPanel allowDragging={false} ref={c => this._panel = c}>
         <SafeAreaView style={styles.panel}>
           <SettingsTopBar toggleSettingsPanel={toggle}/>
-          <TimeRange selectedTimeRange={selectedTimeRange}
-                     onSelectTimeRange={onSelectTimeRange}/>
+          <TimeRange/>
           <ResultsLimit resultsLimit={resultsLimit}
                         onCompleteResultsLimit={onCompleteResultsLimit}/>
         </SafeAreaView>

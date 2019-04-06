@@ -19,7 +19,7 @@ app.get('/api/spotify-credentials', (req, res, next) => {
   const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
   const redirectUri = process.env.SPOTIFY_REDIRECT_URI;
   const spotifyCredentials = { clientId, clientSecret, redirectUri };
-  console.log('hello');
+  console.log('get creds.');
   res.json(spotifyCredentials);
 });
 
@@ -30,9 +30,8 @@ app.get('/api/spotify_token', (req, res, next) => {
 });
 
 app.post('/api/save_spotify_token', (req, res, next) => {
-  console.log('save');
+  console.log('save token');
   let access_token = req.body.access_token;
-  console.log(req.body.access_token);
   fs.writeFile('./spotify_auth/spotifyToken.txt', access_token, (err) => {
     if (err) throw err;
   });

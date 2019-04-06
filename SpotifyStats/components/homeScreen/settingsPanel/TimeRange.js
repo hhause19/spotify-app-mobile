@@ -1,4 +1,6 @@
 import React from 'react';
+import {bindActionCreators} from 'redux';
+import {connect} from 'react-redux';
 import PropTypes from 'prop-types';
 import {
   View,
@@ -7,18 +9,17 @@ import {
   FlatList
 } from 'react-native';
 
-import {ListItem, Icon} from 'react-native-elements'
+import {ListItem, Icon} from 'react-native-elements';
+import {TIME_RANGES} from '../../../constants/spotifyConstants'
 
-const timeRanges = [{key: 'short_term', val: 'Past 4 Weeks'},
-  {key: 'medium_term', val: 'Past 6 Months'},
-  {key: 'long_term', val: 'All Time'}];
+import * as spotifyActions from '../../../actions/spotifyActions';
 
-const TimeRange = ({selectedTimeRange, onSelectTimeRange}) => (
+const TimeRange = ({selectedTimeRange, actions}) => (
   <View>
     <Text style={styles.settingsOptionHeader}>Time Range</Text>
     <FlatList
       keyExtractor={(item, index) => index.toString()}
-      data={timeRanges}
+      data={TIME_RANGES}
       extraData={selectedTimeRange.val}
       renderItem={
         ({item}) => <ListItem
@@ -28,7 +29,7 @@ const TimeRange = ({selectedTimeRange, onSelectTimeRange}) => (
             <Text style={{fontSize: 16, color: '#fff'}}
                   numberOfLines={1}>{item.val}</Text>
           }
-          onPress={() => onSelectTimeRange(item)}
+          onPress={() => actions.updateTimeRange(item.key)}
           rightElement={
             selectedTimeRange.key === item.key && <Icon name='ios-checkmark'
                                                         type='ionicon'
@@ -55,7 +56,21 @@ const styles = StyleSheet.create({
 
 TimeRange.propTypes = {
   selectedTimeRange: PropTypes.object.isRequired,
-  onSelectTimeRange: PropTypes.func.isRequired
+  actions: PropTypes.shape({
+    updateTimeRange: PropTypes.func.isRequired
+  })
 };
 
-export default TimeRange;
+const mapStateToProps = (state) => {
+  return {
+    selectedTimeRange: state.spotify.timeRange
+  };
+};
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    actions: bindActionCreators(spotifyActions, dispatch)
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(TimeRange);

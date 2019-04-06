@@ -10,6 +10,7 @@ const scopes = scopesArr.join(' ');
 const getSpotifyCredentials = async () => {
   const api = await getRestApi();
   const res = await api.get('spotify-credentials');
+  console.log(res.data);
   return res.data
 };
 

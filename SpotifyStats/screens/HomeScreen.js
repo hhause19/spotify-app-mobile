@@ -18,6 +18,9 @@ import {WebBrowser} from 'expo';
 import {AuthSession} from 'expo'
 import {MonoText} from '../components/StyledText';
 
+import {bindActionCreators} from 'redux';
+import { connect } from 'react-redux';
+
 import getSpotifyApi from '../components/api/SpotifyApi';
 import getRestApi from '../components/api/RestApi';
 
@@ -32,12 +35,12 @@ const timeRanges = [{key: 'short_term', val: 'Past 4 Weeks'},
 // for development
 import {songItemsData} from '../testData/songItemData';
 
-export default class HomeScreen extends React.Component {
+class HomeScreen extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       songItems: songItemsData,
-      timeRange: timeRanges[1],
+      //timeRange: timeRanges[1],
       resultsLimit: 25,
       showSettingsPanel: false
     };
@@ -48,19 +51,24 @@ export default class HomeScreen extends React.Component {
   };
 
   componentDidMount() {
-    this.getUserTopTracks();
+    this.getUserTopTracks(this.props.timeRange);
   };
 
   componentDidUpdate(prevProps, prevState, snapshot) {
   };
 
-  getUserTopTracks = async () => {
+  componentWillReceiveProps(nextProps, nextContext) {
+    if (nextProps.timeRange.key !== this.props.timeRange.key) {
+      this.getUserTopTracks(nextProps.timeRange);
+    }
+  }
+
+  getUserTopTracks = async (timeRange) => {
     const api = await getSpotifyApi();
     try {
       const res = await api.get('me/top/tracks', {
-
         params: {
-          time_range: this.state.timeRange.key,
+          time_range: timeRange.key,
           limit: this.state.resultsLimit
         }
       });
@@ -80,11 +88,6 @@ export default class HomeScreen extends React.Component {
     }
   };
 
-  onSelectTimeRange = (timeRange) => {
-    if (timeRange.val !== this.state.timeRange.val)
-      this.setState({timeRange: timeRange}, this.getUserTopTracks);
-  };
-
   onCompleteResultsLimit = (resultsLimit) => {
     if (resultsLimit !== this.state.resultsLimit)
       this.setState({resultsLimit}, this.getUserTopTracks)
@@ -97,6 +100,7 @@ export default class HomeScreen extends React.Component {
   };
 
   render() {
+    console.log(this.props.timeRange);
     return (
       <Fragment>
         <StatusBar
@@ -112,7 +116,7 @@ export default class HomeScreen extends React.Component {
           {/*buttons={timeRangeButtons.map(b => b.value)}*/}
           {/*containerStyle={{height: 50}}*/}
           {/*/>*/}
-          <HomeTopBar timeRange={this.state.timeRange.val}
+          <HomeTopBar timeRange={this.props.timeRange.val}
                       toggleSettingsPanel={this.toggleSettingsPanel}/>
 
           <ScrollView ref={el => this._scrollView = el}
@@ -168,7 +172,7 @@ export default class HomeScreen extends React.Component {
         </SafeAreaView>
         <SettingsPanel show={this.state.showSettingsPanel}
                        toggle={this.toggleSettingsPanel}
-                       selectedTimeRange={this.state.timeRange}
+                       selectedTimeRange={this.props.timeRange}
                        resultsLimit={this.state.resultsLimit}
                        onSelectTimeRange={this.onSelectTimeRange}
                        onCompleteResultsLimit={this.onCompleteResultsLimit}/>
@@ -209,6 +213,20 @@ export default class HomeScreen extends React.Component {
     );
   };
 }
+
+const mapStateToProps = (state) => {
+  return {
+    timeRange: state.spotify.timeRange
+  };
+};
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    actions: bindActionCreators({}, dispatch)
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(HomeScreen);
 
 const styles = StyleSheet.create({
   topSafeView: {

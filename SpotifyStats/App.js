@@ -2,11 +2,22 @@ import React from 'react';
 import { Platform, StatusBar, StyleSheet, View } from 'react-native';
 import { AppLoading, Asset, Font, Icon } from 'expo';
 import {AsyncStorage} from 'react-native';
+
+// Redux
+import { createStore, applyMiddleware } from 'redux';
+import { Provider, connect } from 'react-redux';
+import thunk from 'redux-thunk';
+import rootReducer from './reducers/index';
+import initialState from './reducers/initialState';
+
 import getSpotifyToken from './authorization/getSpotifyToken';
 import AppNavigator from './navigation/AppNavigator';
 
+// API
 import getRestApi from './components/api/RestApi';
 import getSpotifyApi from './components/api/SpotifyApi';
+
+const store = createStore(rootReducer, initialState, applyMiddleware(thunk));
 
 export default class App extends React.Component {
   state = {
@@ -24,10 +35,12 @@ export default class App extends React.Component {
       );
     } else {
       return (
-        <View style={styles.container}>
-          {Platform.OS === 'ios' && <StatusBar barStyle="default" />}
-          <AppNavigator />
-        </View>
+        <Provider store={store}>
+          <View style={styles.container}>
+            {Platform.OS === 'ios' && <StatusBar barStyle="default"/>}
+            <AppNavigator/>
+          </View>
+        </Provider>
       );
     }
   }
@@ -44,9 +57,10 @@ export default class App extends React.Component {
       console.log('spotify already logged in');
       access_token = res.data.access_token;
     } catch (err) {
-      access_token = await getSpotifyToken();
+
     }
 
+    access_token = await getSpotifyToken();
     AsyncStorage.setItem('access_token', access_token);
   };
 
