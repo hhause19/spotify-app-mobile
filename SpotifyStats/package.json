@@ -8,7 +8,8 @@
     "test": "node ./node_modules/jest/bin/jest.js --watchAll"
   },
   "jest": {
-    "preset": "jest-expo"
+    "preset": "jest-expo",
+    "testEnvironment": "node"
   },
   "dependencies": {
     "@expo/samples": "2.1.1",
@@ -35,6 +36,6 @@
     "babel-preset-expo": "^5.0.0",
     "jest-expo": "^32.0.0"
   },
-  "private": true,
-  "proxy": "http://127.0.0.1:3000/"
+  "private": false,
+  "proxy": "https://98c257a3.ngrok.io"
 }

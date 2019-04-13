@@ -17,6 +17,7 @@ import {ButtonGroup} from 'react-native-elements'
 import {WebBrowser} from 'expo';
 import {AuthSession} from 'expo'
 import {MonoText} from '../components/StyledText';
+import {Icon} from 'react-native-elements';
 
 import {bindActionCreators} from 'redux';
 import { connect } from 'react-redux';
@@ -27,10 +28,7 @@ import getRestApi from '../components/api/RestApi';
 import HomeTopBar from '../components/homeScreen/HomeTopBar';
 import SettingsPanel from '../components/homeScreen/settingsPanel/SettingsPanel';
 import SongListItem from '../components/homeScreen/SongListItem';
-
-const timeRanges = [{key: 'short_term', val: 'Past 4 Weeks'},
-  {key: 'medium_term', val: 'Past 6 Months'},
-  {key: 'long_term', val: 'All Time'}];
+import Colors from '../constants/Colors';
 
 // for development
 import {songItemsData} from '../testData/songItemData';
@@ -40,7 +38,6 @@ class HomeScreen extends React.Component {
     super(props);
     this.state = {
       songItems: songItemsData,
-      //timeRange: timeRanges[1],
       resultsLimit: 25,
       showSettingsPanel: false
     };
@@ -50,7 +47,8 @@ class HomeScreen extends React.Component {
     header: null,
   };
 
-  componentDidMount() {
+  async componentDidMount() {
+    this.spotifyApi = await getSpotifyApi();
     this.getUserTopTracks(this.props.timeRange);
   };
 
@@ -64,9 +62,8 @@ class HomeScreen extends React.Component {
   }
 
   getUserTopTracks = async (timeRange) => {
-    const api = await getSpotifyApi();
     try {
-      const res = await api.get('me/top/tracks', {
+      const res = await this.spotifyApi.get('me/top/tracks', {
         params: {
           time_range: timeRange.key,
           limit: this.state.resultsLimit
@@ -78,7 +75,8 @@ class HomeScreen extends React.Component {
           index: i,
           name: song.name,
           artists: song.artists.map(a => a.name),
-          albumCoverSrc: song.album.images[2].url
+          albumCoverSrc: song.album.images[2].url,
+          uri: song.uri
         };
       });
       //console.log(songItems);
@@ -88,9 +86,31 @@ class HomeScreen extends React.Component {
     }
   };
 
+  createPlaylist = async () => {
+    let userId = await AsyncStorage.getItem('spotify_user_id');
+    const songURIs = this.state.songItems.map(s => s.uri);
+    try {
+      let res = await this.spotifyApi.post(`users/${userId}/playlists`, {
+        name: `Top Songs ${this.props.timeRange.val}`
+      });
+      let playlistId = res.data.id;
+      console.log(res.data.id);
+      try {
+        res = await this.spotifyApi.post(`playlists/${playlistId}/tracks`, {
+          uris: songURIs
+        })
+      } catch (err) {
+        console.log(err)
+      }
+      console.log(res.data);
+    } catch (err) {
+      console.log(err)
+    }
+  };
+
   onCompleteResultsLimit = (resultsLimit) => {
     if (resultsLimit !== this.state.resultsLimit)
-      this.setState({resultsLimit}, this.getUserTopTracks)
+      this.setState({resultsLimit}, () => this.getUserTopTracks(this.props.timeRange))
   };
 
   toggleSettingsPanel = () => {
@@ -100,7 +120,6 @@ class HomeScreen extends React.Component {
   };
 
   render() {
-    console.log(this.props.timeRange);
     return (
       <Fragment>
         <StatusBar
@@ -169,12 +188,19 @@ class HomeScreen extends React.Component {
           {/*<MonoText style={styles.codeHighlightText}>navigation/MainTabNavigator.js</MonoText>*/}
           {/*</View>*/}
           {/*</View>*/}
+          <TouchableOpacity
+              style={styles.addButtonStyle}
+              onPress={this.createPlaylist}>
+            <Icon name='ios-add'
+                  size={28}
+                  type='ionicon'
+                  color='#fff'/>
+          </TouchableOpacity>
         </SafeAreaView>
         <SettingsPanel show={this.state.showSettingsPanel}
                        toggle={this.toggleSettingsPanel}
                        selectedTimeRange={this.props.timeRange}
                        resultsLimit={this.state.resultsLimit}
-                       onSelectTimeRange={this.onSelectTimeRange}
                        onCompleteResultsLimit={this.onCompleteResultsLimit}/>
       </Fragment>
     );
@@ -229,6 +255,19 @@ const mapDispatchToProps = (dispatch) => {
 export default connect(mapStateToProps, mapDispatchToProps)(HomeScreen);
 
 const styles = StyleSheet.create({
+  addButtonStyle: {
+    position: 'absolute',
+    right: 10,
+    bottom: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.3)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 60,
+    height: 60,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    borderRadius: 50,
+  },
   topSafeView: {
     flex: 0,
     backgroundColor: 'rgb(33, 33, 33)',

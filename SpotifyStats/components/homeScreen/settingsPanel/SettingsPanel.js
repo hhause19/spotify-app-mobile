@@ -21,8 +21,7 @@ class SettingsPanel extends React.Component {
 
   render() {
     const {
-      toggle, selectedTimeRange, onSelectTimeRange,
-      resultsLimit, onCompleteResultsLimit
+      toggle, resultsLimit, onCompleteResultsLimit
     } = this.props;
 
     return (
@@ -54,9 +53,7 @@ const styles = StyleSheet.create({
 SettingsPanel.propTypes = {
   show: PropTypes.bool.isRequired,
   toggle: PropTypes.func.isRequired,
-  selectedTimeRange: PropTypes.object.isRequired,
   resultsLimit: PropTypes.number.isRequired,
-  onSelectTimeRange: PropTypes.func.isRequired,
   onCompleteResultsLimit: PropTypes.func.isRequired
 };
 

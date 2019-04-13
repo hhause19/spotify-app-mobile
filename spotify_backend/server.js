@@ -1,6 +1,7 @@
 require('dotenv').config();
 const http = require('http');
 const express = require('express');
+var cors = require('cors');
 var bodyParser = require('body-parser');
 const fs = require("fs");
 
@@ -8,6 +9,7 @@ const fs = require("fs");
 const app = express();
 app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
+app.use(cors());
 
 // Handle / route
 app.get('/', (req, res) =>
@@ -27,6 +29,7 @@ app.get('/api/spotify_token', (req, res, next) => {
   fs.readFile('./spotify_auth/spotifyToken.txt', 'utf8', function (err, access_token) {
     res.json({access_token});
   });
+  console.log('get token');
 });
 
 app.post('/api/save_spotify_token', (req, res, next) => {
@@ -39,6 +42,6 @@ app.post('/api/save_spotify_token', (req, res, next) => {
 
 // Launch the server on port 3000
 const server = app.listen(3000, 'localhost', () => {
-  const {address, port } = server.address();
+  const {address, port} = server.address();
   console.log(`Listening at http://${address}:${port}`);
 });

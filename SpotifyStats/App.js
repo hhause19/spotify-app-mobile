@@ -49,18 +49,18 @@ export default class App extends React.Component {
     let access_token;
     const api = await getRestApi();
     const res = await api.get('spotify_token');
-
+    await AsyncStorage.setItem('access_token', res.data.access_token);
     // test if the user is still logged in
     const spotifyApi = await getSpotifyApi();
     try {
-      const loginTest = await spotifyApi.get('me');
-      console.log('spotify already logged in');
-      access_token = res.data.access_token;
+      const userData = await spotifyApi.get('me');
+      AsyncStorage.setItem('spotify_user_id', userData.data.id);
     } catch (err) {
-      access_token = await getSpotifyToken();
+      console.log(err);
+      await AsyncStorage.setItem('access_token', await getSpotifyToken());
+      const userData = await spotifyApi.get('me');
+      AsyncStorage.setItem('spotify_user_id', userData.data.id);
     }
-
-    AsyncStorage.setItem('access_token', access_token);
   };
 
   _loadResourcesAsync = async () => {
