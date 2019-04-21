@@ -49,6 +49,7 @@ class HomeScreen extends React.Component {
 
   async componentDidMount() {
     this.spotifyApi = await getSpotifyApi();
+    this.restApi = await getRestApi();
     this.getUserTopTracks(this.props.timeRange);
   };
 
@@ -79,13 +80,13 @@ class HomeScreen extends React.Component {
           uri: song.uri
         };
       });
-      //console.log(songItems);
       this.setState({songItems}, this._scrollView.scrollTo({x: 0}));
     } catch (err) {
       console.log(err)
     }
   };
 
+  // Creates a new playlist in spotify and adds songs.
   createPlaylist = async () => {
     let userId = await AsyncStorage.getItem('spotify_user_id');
     const songURIs = this.state.songItems.map(s => s.uri);
@@ -94,7 +95,10 @@ class HomeScreen extends React.Component {
         name: `Top Songs ${this.props.timeRange.val}`
       });
       let playlistId = res.data.id;
-      console.log(res.data.id);
+      this.insertPlaylist(res.data);
+      console.log(res.data);
+
+      // inserts songs to playlist
       try {
         res = await this.spotifyApi.post(`playlists/${playlistId}/tracks`, {
           uris: songURIs
@@ -102,9 +106,26 @@ class HomeScreen extends React.Component {
       } catch (err) {
         console.log(err)
       }
-      console.log(res.data);
     } catch (err) {
       console.log(err)
+    }
+  };
+
+  // Inserts a newly created playlist into the DB.
+  insertPlaylist = async (playlist) => {
+    const _data = {
+      id: playlist.id,
+      uri: playlist.uri,
+      name: `Top Songs ${this.props.timeRange.val}`,
+      time_range: this.props.timeRange.key,
+      href: playlist.href,
+      collaborative: playlist.collaborative,
+      _public: playlist.public
+    };
+    try {
+      let res = await this.restApi.post('playlists', _data)
+    } catch (err) {
+      console.log(err);
     }
   };
 

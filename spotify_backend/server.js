@@ -11,10 +11,16 @@ app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 app.use(cors());
 
+//controllers
+let {PlaylistController} = require('./controllers/playlistController');
+PlaylistController = new PlaylistController();
+
 // Handle / route
 app.get('/', (req, res) =>
     res.send('Hello World!')
 );
+
+///////////////// SPOTIFY AUTH ////////////////////////////
 
 app.get('/api/spotify-credentials', (req, res, next) => {
   const clientId = process.env.SPOTIFY_CLIENT_ID;
@@ -38,6 +44,18 @@ app.post('/api/save_spotify_token', (req, res, next) => {
   fs.writeFile('./spotify_auth/spotifyToken.txt', access_token, (err) => {
     if (err) throw err;
   });
+});
+
+////////////////// PLAYLISTS ///////////////////////////////
+
+//gets users playlists
+app.get('/api/playlists', (req, res, next) => {
+
+});
+
+// inserts a newly created playlist into the db.
+app.post('/api/playlists', (req, res, next) => {
+  PlaylistController.insertPlaylist(req, res);
 });
 
 // Launch the server on port 3000
