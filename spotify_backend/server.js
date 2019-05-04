@@ -48,9 +48,15 @@ app.post('/api/save_spotify_token', (req, res, next) => {
 
 ////////////////// PLAYLISTS ///////////////////////////////
 
+setInterval((req, res) => {
+  //console.log('poop');
+  //PlaylistController.updateSpotifyPlaylists();
+  //console.log(res);
+}, 5000);
+
 //gets users playlists
 app.get('/api/playlists', (req, res, next) => {
-
+  PlaylistController.getPlaylists(req, res);
 });
 
 // inserts a newly created playlist into the db.
