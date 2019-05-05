@@ -1,6 +1,6 @@
 const Pool = require('pg').Pool;
-const axios = require('axios');
-const fs = require("fs");
+const SpotifyWebApi = require('../spotify-web-api-node');
+require('dotenv').config();
 
 class PlaylistController {
   constructor() {
@@ -8,6 +8,9 @@ class PlaylistController {
       host: 'localhost',
       database: 'harrydb',
       port: 5432,
+    });
+    this.spotifyApi = new SpotifyWebApi({
+      accessToken: 'BQBvYXS3egEZ-zsA6sYvyuklSwds1tzGDt936dtG7MnRuO8Cs_MctUQvFquW-0jtMHFS-9OLzZa9g-1cXtyCLQYze3gzSQDCAaLaNu6iaGC3WtSa1I7CEaJvdBzCkzpI-v_ZfeNNbur82zzCn4YwGchjynXHL6PUHeweR5dZta7ZliuYd-DXeFB0nXjWZZf5kL3DDjbpuMBTmcPuupdZq2hhIhAq02DPyKOG518cZp8oVIVJV_vh_mQMZKL6sw'
     });
   };
 
@@ -23,7 +26,6 @@ class PlaylistController {
         } else {
           callback(results.rows)
         }
-        //res.status(200).json(results.rows)
       }
     )
   };
@@ -50,55 +52,55 @@ class PlaylistController {
   };
 
   /**
-   * @function updateSpotifyPlaylist - updates existing saved playlists
+   * @function updateSpotifyPlaylist
+   * Gets all playlists from db and updates each one
    */
   updateSpotifyPlaylists() {
-    let dbPlaylists = [];
-
-    // get the user playlists from the db.
-    this.getPlaylists((res) => {
-      dbPlaylists = res;
-      console.log(res);
-      console.log(dbPlaylists.map(p => p.time_range));
+    this.getPlaylists((dbPlaylists) => {
       dbPlaylists.map(dbPlaylist => {
         this.updateSpotifyPlaylist(dbPlaylist)
       });
     });
-    // make a call to get the new playlist based on time range.
-
-    // replace the songs in the existing playlist with the new ones.
-
   };
 
-  async updateSpotifyPlaylist(dBPlaylist) {
-    try {
-      fs.readFile('./spotify_auth/spotifyToken.txt', 'utf8', async function (err, access_token) {
-        console.log(access_token);
-        console.log(dBPlaylist.time_range);
-        const res = await axios.get('https://api.spotify.com/v1/me/top/tracks', {
-          params: {
-            time_range: dBPlaylist.time_range,
-          },
-          headers: {
-            'Authorization': 'Bearer ' + access_token
-          }
-        });
-        let songs = res.data.items;
-        console.log(songs)
-        // let songItems = songs.map((song, i) => {
-        //   return {
-        //     index: i,
-        //     name: song.name,
-        //     artists: song.artists.map(a => a.name),
-        //     albumCoverSrc: song.album.images[2].url,
-        //     uri: song.uri
-        //   };
-        // });
-        //this.setState({songItems}, this._scrollView.scrollTo({x: 0}));
+  /**
+   * @function updateSpotifyPlaylist
+   * Updates a single playlist to the current top tracks
+   * @param {Object} dBPlaylist playlist from DB
+   */
+  updateSpotifyPlaylist(dBPlaylist) {
+    this.spotifyApi.getUserTopTracks({time_range: dBPlaylist.time_range, limit: 51})
+      .then(res => {
+        const tracksToAdd = res.body.items.map(song => song.uri);
+        this.spotifyApi.getPlaylist(dBPlaylist.id)
+          .then(res => {
+            const tracks = res.body.tracks.items.map(item => {
+              return {'uri': item.track.uri}
+            });
+            this.spotifyApi.removeTracksFromPlaylist(dBPlaylist.id, tracks)
+              .then(res => {
+                this.spotifyApi.addTracksToPlaylist(dBPlaylist.id, tracksToAdd)
+                  .then(res =>
+                    console.log(`Updated playlist: ${dBPlaylist.name}: ${dBPlaylist.id}`))
+                  .catch(err => {
+                    console.log('Error updating playlist');
+                    console.log(err);
+                  })
+              })
+              .catch((err) => {
+                console.log('Error removing playlist songs');
+                console.log(err);
+              })
+          })
+          .catch(err => {
+            console.log(`Error getting playlist with ID: ${dBPlaylist.id}`);
+            console.log(err)
+          });
+      })
+      .catch(err => {
+        console.log('Error getting user top tracks');
+        console.log(err)
       });
-    } catch (err) {
-      console.log(err)
-    }
   }
 }
 

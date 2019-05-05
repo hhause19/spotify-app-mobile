@@ -19,6 +19,7 @@ export default getTokens = async () => {
     });
     const responseJson = await response.json();
     const api = await getRestApi();
+
     api.post('save_spotify_token', {access_token: responseJson.access_token});
     // destructure the response and rename the properties to be in camelCase to satisfy my linter ;)
     // const {

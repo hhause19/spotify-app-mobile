@@ -49,10 +49,17 @@ app.post('/api/save_spotify_token', (req, res, next) => {
 ////////////////// PLAYLISTS ///////////////////////////////
 
 setInterval((req, res) => {
-  //console.log('poop');
-  //PlaylistController.updateSpotifyPlaylists();
-  //console.log(res);
-}, 5000);
+  const currentdate = new Date();
+  const datetime = "Playlist Update: " + currentdate.getDate() + "/"
+    + (currentdate.getMonth() + 1) + "/"
+    + currentdate.getFullYear() + " @ "
+    + currentdate.getHours() + ":"
+    + currentdate.getMinutes() + ":"
+    + currentdate.getSeconds();
+
+  console.log(datetime);
+  PlaylistController.updateSpotifyPlaylists();
+}, 50000);
 
 //gets users playlists
 app.get('/api/playlists', (req, res, next) => {
