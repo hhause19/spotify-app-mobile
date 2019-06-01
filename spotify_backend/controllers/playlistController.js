@@ -1,25 +1,19 @@
-const Pool = require('pg').Pool;
 const SpotifyWebApi = require('../spotify-web-api-node');
-require('dotenv').config();
+const {cn} = require('../db/connection');
 
 class PlaylistController {
   constructor() {
-    this.pool = new Pool({
-      host: 'localhost',
-      database: 'harrydb',
-      port: 5432,
-    });
     this.spotifyApi = new SpotifyWebApi({
-      accessToken: 'BQBvYXS3egEZ-zsA6sYvyuklSwds1tzGDt936dtG7MnRuO8Cs_MctUQvFquW-0jtMHFS-9OLzZa9g-1cXtyCLQYze3gzSQDCAaLaNu6iaGC3WtSa1I7CEaJvdBzCkzpI-v_ZfeNNbur82zzCn4YwGchjynXHL6PUHeweR5dZta7ZliuYd-DXeFB0nXjWZZf5kL3DDjbpuMBTmcPuupdZq2hhIhAq02DPyKOG518cZp8oVIVJV_vh_mQMZKL6sw'
+      accessToken: 'BQBZGQSqlyHh9phV-rijoL_2sE6U1TXJEaTe3n9QzIZMqycPAoBF9Tndz1iXf0pmQP3YcA76_7sY3epB8B-H2L2IhU0U5yfoMIvZ-grz5YImW8_0RZ-hQQ8VhoF3gbryLq_MfTP7BczFKt5KQkMbwPf_2dw7i0g_8Ne0xAHqxm79pt8XfKmXe4t31O0f10Et4cXjMmunIzSWHXptbxWENUI76ieBDOK-6fwrfS6PyG-bK2a2TLPZ2pPZYD_Z2g'
     });
   };
 
   /**
-   * @function getPlaylists - gets all user playlists
+   * getPlaylists - gets all user playlists
    * @param callback
    */
   getPlaylists(callback) {
-    this.pool.query(
+    cn.query(
       'SELECT * FROM playlist', (error, results) => {
         if (error) {
           throw error;
@@ -31,7 +25,7 @@ class PlaylistController {
   };
 
   /**
-   * @function insertPlaylist - inserts a new spotify playlist
+   * insertPlaylist - inserts a new spotify playlist
    * @param req
    * @param res
    */
@@ -40,7 +34,7 @@ class PlaylistController {
       id, uri, name, time_range, href, collaborative, _public
     } = req.body;
 
-    this.pool.query(
+    cn.query(
       'INSERT INTO playlist (id, uri, name, time_range, href, collaborative, public) ' +
       'VALUES ($1, $2, $3, $4, $5, $6, $7)',
       [id, uri, name, time_range, href, collaborative, _public], (error, results) => {
@@ -52,7 +46,7 @@ class PlaylistController {
   };
 
   /**
-   * @function updateSpotifyPlaylist
+   * updateSpotifyPlaylist
    * Gets all playlists from db and updates each one
    */
   updateSpotifyPlaylists() {
@@ -64,8 +58,7 @@ class PlaylistController {
   };
 
   /**
-   * @function updateSpotifyPlaylist
-   * Updates a single playlist to the current top tracks
+   * updateSpotifyPlaylist - Updates a single playlist to the current top tracks
    * @param {Object} dBPlaylist playlist from DB
    */
   updateSpotifyPlaylist(dBPlaylist) {

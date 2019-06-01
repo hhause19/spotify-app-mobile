@@ -8,16 +8,16 @@ const fs = require("fs");
 // Initialize http server
 const app = express();
 app.use(bodyParser.json()); // support json encoded bodies
-app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
+app.use(bodyParser.urlencoded({extended: true})); // support encoded bodies
 app.use(cors());
 
 //controllers
 let {PlaylistController} = require('./controllers/playlistController');
-PlaylistController = new PlaylistController();
+const playlistCtrl = new PlaylistController();
 
 // Handle / route
 app.get('/', (req, res) =>
-    res.send('Hello World!')
+  res.send('Hello World!')
 );
 
 ///////////////// SPOTIFY AUTH ////////////////////////////
@@ -26,7 +26,7 @@ app.get('/api/spotify-credentials', (req, res, next) => {
   const clientId = process.env.SPOTIFY_CLIENT_ID;
   const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
   const redirectUri = process.env.SPOTIFY_REDIRECT_URI;
-  const spotifyCredentials = { clientId, clientSecret, redirectUri };
+  const spotifyCredentials = {clientId, clientSecret, redirectUri};
   console.log('get creds.');
   res.json(spotifyCredentials);
 });
@@ -48,6 +48,7 @@ app.post('/api/save_spotify_token', (req, res, next) => {
 
 ////////////////// PLAYLISTS ///////////////////////////////
 
+// periodically update playlists
 setInterval((req, res) => {
   const currentdate = new Date();
   const datetime = "Playlist Update: " + currentdate.getDate() + "/"
@@ -58,17 +59,17 @@ setInterval((req, res) => {
     + currentdate.getSeconds();
 
   console.log(datetime);
-  PlaylistController.updateSpotifyPlaylists();
+  playlistCtrl.updateSpotifyPlaylists();
 }, 50000);
 
-//gets users playlists
+// gets users playlists
 app.get('/api/playlists', (req, res, next) => {
-  PlaylistController.getPlaylists(req, res);
+  playlistCtrl.getPlaylists(req, res);
 });
 
 // inserts a newly created playlist into the db.
 app.post('/api/playlists', (req, res, next) => {
-  PlaylistController.insertPlaylist(req, res);
+  playlistCtrl.insertPlaylist(req, res);
 });
 
 // Launch the server on port 3000
