@@ -2,7 +2,7 @@ import axios from 'axios';
 
 export default getRestApi = async () => {
   return axios.create({
-    baseURL: 'https://a7058ae4.ngrok.io/api',
+    baseURL: 'https://1f8c6c7f.ngrok.io/api',
     headers: {
       'Content-Type': 'application/json'
     }
