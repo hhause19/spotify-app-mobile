@@ -1,16 +1,18 @@
 import React from 'react';
-import { Platform, StatusBar, StyleSheet, View } from 'react-native';
-import { AppLoading, Asset, Font, Icon } from 'expo';
+import {Platform, StatusBar, StyleSheet, View} from 'react-native';
+import {AppLoading, Asset, Font, Icon} from 'expo';
 import {AsyncStorage} from 'react-native';
 
 // Redux
-import { createStore, applyMiddleware } from 'redux';
-import { Provider, connect } from 'react-redux';
+import {createStore, applyMiddleware} from 'redux';
+import {Provider, connect} from 'react-redux';
 import thunk from 'redux-thunk';
 import rootReducer from './reducers/index';
 import initialState from './reducers/initialState';
 
 import getSpotifyToken from './authorization/getSpotifyToken';
+import refreshTokens from './authorization/refreshTokens';
+
 import AppNavigator from './navigation/AppNavigator';
 
 // API
@@ -46,17 +48,28 @@ export default class App extends React.Component {
   }
 
   _getUserSpotifyToken = async () => {
-    let access_token;
     const api = await getRestApi();
-    const res = await api.get('spotify_token');
-    await AsyncStorage.setItem('access_token', res.data.access_token);
-    // test if the user is still logged in
     const spotifyApi = await getSpotifyApi();
+
+    const res = await api.get('spotify_token');
+    const {access_token, refresh_token, expiration_time} = res.data;
+    console.log(res.data);
+    // check that the token is not expired
+    if (!expiration_time || new Date().getTime() > expiration_time) {
+      console.log('Refresh access token');
+      await AsyncStorage.setItem('access_token', await refreshTokens(refresh_token));
+    } else {
+      console.log('Access token valid');
+      await AsyncStorage.setItem('access_token', access_token);
+    }
+
+    // get user id, save in storage. If error prompt for spotify auth
     try {
       const userData = await spotifyApi.get('me');
       AsyncStorage.setItem('spotify_user_id', userData.data.id);
     } catch (err) {
       console.log(err);
+      console.log('Logging user in');
       await AsyncStorage.setItem('access_token', await getSpotifyToken());
       const userData = await spotifyApi.get('me');
       AsyncStorage.setItem('spotify_user_id', userData.data.id);
@@ -88,7 +101,7 @@ export default class App extends React.Component {
   };
 
   _handleFinishLoading = () => {
-    this.setState({ isLoadingComplete: true });
+    this.setState({isLoadingComplete: true});
   };
 }
 

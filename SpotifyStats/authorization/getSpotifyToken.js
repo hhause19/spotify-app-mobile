@@ -20,7 +20,23 @@ export default getTokens = async () => {
     const responseJson = await response.json();
     const api = await getRestApi();
 
-    api.post('save_spotify_token', {access_token: responseJson.access_token});
+    const {
+      access_token: newAccessToken,
+      refresh_token: newRefreshToken,
+      expires_in: expiresIn,
+    } = responseJson;
+
+    const expirationTime = new Date().getTime() + expiresIn * 1000;
+
+    // save the new tokens
+    const data = {
+      access_token: newAccessToken,
+      refresh_token: newRefreshToken,
+      expiration_time: expirationTime
+    };
+
+    api.post('save_spotify_tokens', data);
+
     // destructure the response and rename the properties to be in camelCase to satisfy my linter ;)
     // const {
     //   access_token: accessToken,

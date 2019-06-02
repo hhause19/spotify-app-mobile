@@ -1,0 +1,17 @@
+CREATE TABLE playlist (
+	id text  PRIMARY KEY,
+	uri text,
+	user_id integer REFERENCES public.user(id) NOT NULL,
+	name text,
+	time_range, text,
+	 href text,
+	collaborative boolean DEFAULT false,
+	public boolean DEFAULT false
+);
+
+
+CREATE TABLE public."user" (
+   id serial PRIMARY KEY,
+    name text,
+    email text
+);

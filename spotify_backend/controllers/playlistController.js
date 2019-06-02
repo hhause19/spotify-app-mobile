@@ -1,11 +1,9 @@
-const SpotifyWebApi = require('../spotify-web-api-node');
-const {cn} = require('../db/connection');
+const cn = require('../db/connection');
+const fs = require('fs');
+const spotifyApi = require('../db/spotifyBackendApi');
 
 class PlaylistController {
   constructor() {
-    this.spotifyApi = new SpotifyWebApi({
-      accessToken: 'BQBZGQSqlyHh9phV-rijoL_2sE6U1TXJEaTe3n9QzIZMqycPAoBF9Tndz1iXf0pmQP3YcA76_7sY3epB8B-H2L2IhU0U5yfoMIvZ-grz5YImW8_0RZ-hQQ8VhoF3gbryLq_MfTP7BczFKt5KQkMbwPf_2dw7i0g_8Ne0xAHqxm79pt8XfKmXe4t31O0f10Et4cXjMmunIzSWHXptbxWENUI76ieBDOK-6fwrfS6PyG-bK2a2TLPZ2pPZYD_Z2g'
-    });
   };
 
   /**
@@ -50,11 +48,27 @@ class PlaylistController {
    * Gets all playlists from db and updates each one
    */
   updateSpotifyPlaylists() {
-    this.getPlaylists((dbPlaylists) => {
-      dbPlaylists.map(dbPlaylist => {
-        this.updateSpotifyPlaylist(dbPlaylist)
+    // refresh the access token
+    spotifyApi.refreshAccessToken()
+      .then(data => {
+        // Set access token and update playlists
+        spotifyApi.setAccessToken(data.body['access_token']);
+
+        // update the expire time
+        const expirationTime = new Date().getTime() + data.body['expires_in'] * 1000;
+        fs.writeFile('./spotify_auth/expirationTime.txt', expirationTime, (err) => {
+          if (err) throw err;
+        });
+
+        this.getPlaylists((dbPlaylists) => {
+          dbPlaylists.map(dbPlaylist => {
+            this.updateSpotifyPlaylist(dbPlaylist)
+          });
+        });
+      })
+      .catch(err => {
+        console.log('Could not refresh access token', err);
       });
-    });
   };
 
   /**
@@ -62,17 +76,17 @@ class PlaylistController {
    * @param {Object} dBPlaylist playlist from DB
    */
   updateSpotifyPlaylist(dBPlaylist) {
-    this.spotifyApi.getUserTopTracks({time_range: dBPlaylist.time_range, limit: 51})
+    spotifyApi.getUserTopTracks({time_range: dBPlaylist.time_range, limit: 51})
       .then(res => {
         const tracksToAdd = res.body.items.map(song => song.uri);
-        this.spotifyApi.getPlaylist(dBPlaylist.id)
+        spotifyApi.getPlaylist(dBPlaylist.id)
           .then(res => {
             const tracks = res.body.tracks.items.map(item => {
               return {'uri': item.track.uri}
             });
-            this.spotifyApi.removeTracksFromPlaylist(dBPlaylist.id, tracks)
+            spotifyApi.removeTracksFromPlaylist(dBPlaylist.id, tracks)
               .then(res => {
-                this.spotifyApi.addTracksToPlaylist(dBPlaylist.id, tracksToAdd)
+                spotifyApi.addTracksToPlaylist(dBPlaylist.id, tracksToAdd)
                   .then(res =>
                     console.log(`Updated playlist: ${dBPlaylist.name}: ${dBPlaylist.id}`))
                   .catch(err => {
