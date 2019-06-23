@@ -1,0 +1,25 @@
+{
+  "name": "spotify_backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "dependencies": {
+    "axios": "^0.18.0",
+    "body-parser": "^1.18.3",
+    "winston": "^3.0.0",
+    "express-winston": "^3.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^7.0.0",
+    "expo-server-sdk": "^3.2.0",
+    "express": "^4.16.4",
+    "nodemon": "^1.18.10",
+    "pg": "^7.10.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "Harry Hause",
+  "license": "ISC"
+}

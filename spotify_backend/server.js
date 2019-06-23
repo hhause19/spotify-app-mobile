@@ -98,7 +98,7 @@ setInterval(() => {
   playlistCtrl.updateSpotifyPlaylists();
   // 5 mins - 300000
   // 30 minutes - 1800000
-}, 3000);
+}, 1800000);
 
 // gets users playlists
 app.get('/api/playlists', (req, res, next) => {
