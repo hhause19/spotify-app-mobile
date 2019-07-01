@@ -31,6 +31,8 @@ app.use(cors());
 //controllers
 let {PlaylistController} = require('./controllers/playlistController');
 const playlistCtrl = new PlaylistController();
+let {UserController} = require('./controllers/userController.js');
+const userCtrl = new UserController();
 
 // Handle / route
 app.get('/', (req, res) =>
@@ -78,8 +80,13 @@ app.post('/api/save_spotify_tokens', (req, res, next) => {
   });
 });
 
-////////////////// PLAYLISTS ///////////////////////////////
+////////////////// USER ///////////////////////////////
+app.post('/api/login', (req, res, next) => {
+    userCtrl.getUser(req, res);
+})
 
+////////////////// PLAYLISTS ///////////////////////////////
+https://f7786847.ngrok.io
 //TODO: set the interval to the expirey time and update token
 handleAccessToken = () => {
 };

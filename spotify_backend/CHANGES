@@ -1,3 +1,14 @@
+v0.0.1-------------------
+ALTER TABLE playlist ADD FORIGN KEY (user_id) REFERENCES public.user(id);
+
+CREATE TABLE spotify_tokens (
+    user_id int REFERENCES public.user(id) NOT NULL,
+    access_token text,
+    refresh_token text,
+    expiration_time int
+);
+
+v0.0.0--------------------
 CREATE TABLE playlist (
 	id text  PRIMARY KEY,
 	uri text,
@@ -15,3 +26,4 @@ CREATE TABLE public."user" (
     name text,
     email text
 );
+
