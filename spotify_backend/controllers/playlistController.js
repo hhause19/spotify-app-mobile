@@ -7,7 +7,8 @@ class PlaylistController {
   };
 
   /**
-   * getPlaylists - gets all user playlists
+   * getPlaylists - gets all user playlists from db, and returns the
+   * corresponding spotify ones
    * @param callback
    */
   getPlaylists(req, res) {
@@ -16,8 +17,17 @@ class PlaylistController {
         if (error) {
           throw error;
         } else {
-          //callback(results.rows)
-          res.status(200).send(results.rows);
+          let playlists = [];
+          Promise.all(results.rows.map(playlist => {
+            return spotifyApi.getPlaylist(playlist.id)
+          }))
+            .then(data => {
+              console.log(data);
+              data.map(playlist => {
+                playlists = playlists.concat(playlist.body);
+              });
+              res.status(200).send(playlists);
+            })
         }
       }
     )

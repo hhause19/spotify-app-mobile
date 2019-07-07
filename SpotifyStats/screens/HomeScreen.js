@@ -52,6 +52,7 @@ class HomeScreen extends React.Component {
   async componentDidMount() {
     this.spotifyApi = await getSpotifyApi();
     this.restApi = await getRestApi();
+
     this.props.actions.loadCreatedPlaylists();
     this.getUserTopTracks(this.props.timeRange);
   };
@@ -199,7 +200,8 @@ class HomeScreen extends React.Component {
 
 const mapStateToProps = (state) => {
   return {
-    timeRange: state.spotify.timeRange
+    timeRange: state.spotify.timeRange,
+    playlists: state.spotify.playlists
   };
 };
 

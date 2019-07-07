@@ -65,7 +65,7 @@ class PlaylistsScreen extends React.Component {
 
 const mapStateToProps = (state) => {
   return {
-    timeRange: state.spotify.timeRange
+    playlists: state.spotify.playlists
   };
 };
 
