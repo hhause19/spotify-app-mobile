@@ -20,7 +20,9 @@ import {MonoText} from '../components/StyledText';
 import {Icon} from 'react-native-elements';
 
 import {bindActionCreators} from 'redux';
-import { connect } from 'react-redux';
+import {connect} from 'react-redux';
+
+import * as playlistActions from '../actions/playlistActions';
 
 import getSpotifyApi from '../components/api/SpotifyApi';
 import getRestApi from '../components/api/RestApi';
@@ -50,6 +52,7 @@ class HomeScreen extends React.Component {
   async componentDidMount() {
     this.spotifyApi = await getSpotifyApi();
     this.restApi = await getRestApi();
+    this.props.actions.loadCreatedPlaylists();
     this.getUserTopTracks(this.props.timeRange);
   };
 
@@ -149,116 +152,49 @@ class HomeScreen extends React.Component {
         />
         <SafeAreaView style={styles.topSafeView}/>
         <SafeAreaView style={styles.container}>
-
-          {/*<ButtonGroup*/}
-          {/*onPress={this.onSelectTimeRange}*/}
-          {/*selectedIndex={timeRangeButtons.findIndex(b => b.key === this.state.timeRange)}*/}
-          {/*buttons={timeRangeButtons.map(b => b.value)}*/}
-          {/*containerStyle={{height: 50}}*/}
-          {/*/>*/}
-          <HomeTopBar timeRange={this.props.timeRange.val}
-                      toggleSettingsPanel={this.toggleSettingsPanel}/>
-
-          <ScrollView ref={el => this._scrollView = el}
-                      style={styles.container}
-                      contentContainerStyle={styles.contentContainer}>
-
+          <HomeTopBar
+            timeRange={this.props.timeRange.val}
+            toggleSettingsPanel={this.toggleSettingsPanel}
+          />
+          <ScrollView
+            ref={el => this._scrollView = el}
+            style={styles.container}
+            contentContainerStyle={styles.contentContainer}
+          >
             <FlatList
               data={this.state.songItems}
               keyExtractor={(item, index) => index.toString()}
-              renderItem={({item}) => <SongListItem index={item.index}
-                                                    name={item.name}
-                                                    artists={item.artists}
-                                                    albumCoverSrc={item.albumCoverSrc}/>}/>
-            {/*<View style={styles.welcomeContainer}>*/}
-            {/*<Image*/}
-            {/*source={*/}
-            {/*__DEV__*/}
-            {/*? require('../assets/images/robot-dev.png')*/}
-            {/*: require('../assets/images/robot-prod.png')*/}
-            {/*}*/}
-            {/*style={styles.welcomeImage}*/}
-            {/*/>*/}
-            {/*</View>*/}
-
-            {/*<View style={styles.getStartedContainer}>*/}
-            {/*{this._maybeRenderDevelopmentModeWarning()}*/}
-
-            {/*<Text style={styles.getStartedText}>Get started by opening</Text>*/}
-
-            {/*<View style={[styles.codeHighlightContainer, styles.homeScreenFilename]}>*/}
-            {/*<MonoText style={styles.codeHighlightText}>screens/Hello.js</MonoText>*/}
-            {/*</View>*/}
-
-            {/*<Text style={styles.getStartedText}>*/}
-            {/*{this.state.name ? `${this.state.name}` : 'Change this text and your app will automatically reload.'}*/}
-            {/*</Text>*/}
-            {/*</View>*/}
-
-            {/*<View style={styles.helpContainer}>*/}
-            {/*<TouchableOpacity onPress={this._handleHelpPress} style={styles.helpLink}>*/}
-            {/*<Text style={styles.helpLinkText}>Help, it didn’t automatically reload!</Text>*/}
-            {/*</TouchableOpacity>*/}
-            {/*</View>*/}
+              renderItem={({item}) => (
+                <SongListItem
+                  index={item.index}
+                  name={item.name}
+                  artists={item.artists}
+                  albumCoverSrc={item.albumCoverSrc}
+                />
+              )}/>
           </ScrollView>
-
-          {/*<View style={styles.tabBarInfoContainer}>*/}
-          {/*<Text style={styles.tabBarInfoText}>This is a tab bar. You can edit it in:</Text>*/}
-
-          {/*<View style={[styles.codeHighlightContainer, styles.navigationFilename]}>*/}
-          {/*<MonoText style={styles.codeHighlightText}>navigation/MainTabNavigator.js</MonoText>*/}
-          {/*</View>*/}
-          {/*</View>*/}
           <TouchableOpacity
-              style={styles.addButtonStyle}
-              onPress={this.createPlaylist}>
-            <Icon name='ios-add'
-                  size={28}
-                  type='ionicon'
-                  color='#fff'/>
+            style={styles.addButtonStyle}
+            onPress={this.createPlaylist}
+          >
+            <Icon
+              name='ios-add'
+              size={28}
+              type='ionicon'
+              color='#fff'
+            />
           </TouchableOpacity>
         </SafeAreaView>
-        <SettingsPanel show={this.state.showSettingsPanel}
-                       toggle={this.toggleSettingsPanel}
-                       selectedTimeRange={this.props.timeRange}
-                       resultsLimit={this.state.resultsLimit}
-                       onCompleteResultsLimit={this.onCompleteResultsLimit}/>
+        <SettingsPanel
+          show={this.state.showSettingsPanel}
+          toggle={this.toggleSettingsPanel}
+          selectedTimeRange={this.props.timeRange}
+          resultsLimit={this.state.resultsLimit}
+          onCompleteResultsLimit={this.onCompleteResultsLimit}
+        />
       </Fragment>
     );
   }
-
-  _maybeRenderDevelopmentModeWarning() {
-    if (__DEV__) {
-      const learnMoreButton = (
-        <Text onPress={this._handleLearnMorePress} style={styles.helpLinkText}>
-          Learn more
-        </Text>
-      );
-
-      return (
-        <Text style={styles.developmentModeText}>
-          Development mode is enabled, your app will be slower but you can use useful development
-          tools. {learnMoreButton}
-        </Text>
-      );
-    } else {
-      return (
-        <Text style={styles.developmentModeText}>
-          You are not in development mode, your app will run at full speed.
-        </Text>
-      );
-    }
-  }
-
-  _handleLearnMorePress = () => {
-    WebBrowser.openBrowserAsync('https://docs.expo.io/versions/latest/guides/development-mode');
-  };
-
-  _handleHelpPress = () => {
-    WebBrowser.openBrowserAsync(
-      'https://docs.expo.io/versions/latest/guides/up-and-running.html#can-t-see-your-changes'
-    );
-  };
 }
 
 const mapStateToProps = (state) => {
@@ -269,7 +205,9 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    actions: bindActionCreators({}, dispatch)
+    actions: bindActionCreators(Object.assign({},
+      playlistActions
+    ), dispatch)
   };
 };
 

@@ -83,10 +83,9 @@ app.post('/api/save_spotify_tokens', (req, res, next) => {
 ////////////////// USER ///////////////////////////////
 app.post('/api/login', (req, res, next) => {
     userCtrl.getUser(req, res);
-})
+});
 
 ////////////////// PLAYLISTS ///////////////////////////////
-https://f7786847.ngrok.io
 //TODO: set the interval to the expirey time and update token
 handleAccessToken = () => {
 };
@@ -109,6 +108,7 @@ setInterval(() => {
 
 // gets users playlists
 app.get('/api/playlists', (req, res, next) => {
+  console.log('hello');
   playlistCtrl.getPlaylists(req, res);
 });
 
@@ -116,6 +116,11 @@ app.get('/api/playlists', (req, res, next) => {
 app.post('/api/playlists', (req, res, next) => {
   playlistCtrl.insertPlaylist(req, res);
 });
+
+// app.get('/api/test', (req, res, next) => {
+//   console.log('testing, hello');
+//   res.json({hello: 'hello'});
+// });
 
 // Launch the server on port 3000
 const server = app.listen(3000, 'localhost', () => {

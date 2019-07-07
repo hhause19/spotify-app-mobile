@@ -10,13 +10,14 @@ class PlaylistController {
    * getPlaylists - gets all user playlists
    * @param callback
    */
-  getPlaylists(callback) {
+  getPlaylists(req, res) {
     cn.query(
       'SELECT * FROM playlist', (error, results) => {
         if (error) {
           throw error;
         } else {
-          callback(results.rows)
+          //callback(results.rows)
+          res.status(200).send(results.rows);
         }
       }
     )

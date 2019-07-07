@@ -47,12 +47,12 @@ export default class App extends React.Component {
     }
   }
 
-  //logins in the current user 
-  _loginUser = async () => {
-    const api = await getRestApi();
-    res = api.post('login', 0);
-    console.log(res);
-  };
+  // //logs in the current user
+  // _loginUser = async () => {
+  //   const api = await getRestApi();
+  //   res = api.post('login', 0);
+  //   console.log(res);
+  // };
 
   _getUserSpotifyToken = async () => {
     const api = await getRestApi();
